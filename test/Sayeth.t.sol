@@ -1,24 +1,43 @@
-// SPDX-License-Identifier: UNLICENSED
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import {Test, console} from "forge-std/Test.sol";
-import {Counter} from "../src/Counter.sol";
+import {Sayeth} from "../../src/Sayeth.sol";
 
-contract CounterTest is Test {
-    Counter public counter;
+import {Test, console} from "forge-std/Test.sol";
+
+contract SayethTest is Test {
+    event Say(address referrer, address sender, address origin, bytes content);
+    event Scribe(address referrer, address sender, address origin, bytes content, uint256 index);
+
+    Sayeth public _sayeth;
 
     function setUp() public {
-        counter = new Counter();
-        counter.setNumber(0);
+        _sayeth = new Sayeth();
     }
 
-    function test_Increment() public {
-        counter.increment();
-        assertEq(counter.number(), 1);
+    function testSay_publicChannel() public {
+        _say();
     }
 
-    function testFuzz_SetNumber(uint256 x) public {
-        counter.setNumber(x);
-        assertEq(counter.number(), x);
+    function testScribe_publicChannel() public {
+        _scribe();
+    }
+
+    function _say() public {
+        vm.expectEmit(true, false, false, true);
+
+        emit Say(address(0), address(1), address(1), abi.encode("hello world computer"));
+
+        vm.prank(address(1), address(1));
+        _sayeth.sayeth(address(0), abi.encode("hello world computer"), false);
+    }
+
+    function _scribe() public {
+        vm.expectEmit(true, false, false, true);
+
+        emit Scribe(address(0), address(1), address(1), abi.encode("hello world computer"), 0);
+
+        vm.prank(address(1), address(1));
+        _sayeth.sayeth(address(0), abi.encode("hello world computer"), true);
     }
 }
