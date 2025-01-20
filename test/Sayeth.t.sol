@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import {Sayeth} from "../../src/Sayeth.sol";
+import {Sayeth, Record} from "../../src/Sayeth.sol";
 
 import {Test, console} from "forge-std/Test.sol";
 
@@ -21,6 +21,14 @@ contract SayethTest is Test {
 
     function testScribe_publicChannel() public {
         _scribe();
+
+        Record memory record = _sayeth.getRecord(0);
+
+        assertEq(record.sender, address(1));
+        assertEq(record.origin, address(1));
+        assertEq(record.content, abi.encode("hello world computer"));
+        assertEq(record.referrer, address(0));
+        assertEq(_sayeth.getRecordAmt(), 1);
     }
 
     function _say() public {

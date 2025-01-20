@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-interface IReferrer {
-    function validatePost(address sender, address origin, bytes calldata content) external returns (bool);
-}
+import {IReferrer} from "./interfaces/IReferrer.sol";
 
 struct Record {
     address sender;
@@ -31,5 +29,13 @@ contract Sayeth {
         } else {
             emit Say(_referrer, msg.sender, tx.origin, _content);
         }
+    }
+
+    function getRecord(uint256 _index) public view returns (Record memory) {
+        return records[_index];
+    }
+
+    function getRecordAmt() public view returns (uint256) {
+        return records.length;
     }
 }
