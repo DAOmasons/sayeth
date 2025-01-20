@@ -81,6 +81,17 @@ contract SayethTest is Test {
         _sayeth.sayeth(address(_stakeReferrer), abi.encode("hello world computer"), true);
     }
 
+    function testRevert_say_withdrawn() public {
+        vm.warp(block.timestamp + ONE_WEEK + 1);
+
+        vm.startPrank(staker1, staker1);
+        _stakeReferrer.withdraw();
+
+        vm.expectRevert("Post not validated by referrer");
+        _sayeth.sayeth(address(_stakeReferrer), abi.encode("hello world computer"), false);
+        vm.stopPrank();
+    }
+
     function _stake(address _staker) public {
         vm.startPrank(_staker);
         _token.approve(address(_stakeReferrer), _stakeAmt);
