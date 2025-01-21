@@ -4,12 +4,13 @@ pragma solidity ^0.8.13;
 import {IReferrer} from "./interfaces/IReferrer.sol";
 
 struct Record {
-    address sender;
-    address origin;
-    bytes content;
-    address referrer;
+    address sender; // The address of the sender (contract or EOA)
+    address origin; // The address of the origin (original sender)
+    bytes content; // The bytes content of the message
+    address referrer; // The address of the referrer contract (if any)
 }
 
+//
 contract Sayeth {
     event Say(address referrer, address sender, address origin, bytes content);
     event Scribe(address referrer, address sender, address origin, bytes content, uint256 index);
@@ -35,7 +36,7 @@ contract Sayeth {
         return records[_index];
     }
 
-    function getRecordAmt() public view returns (uint256) {
+    function getRecordLength() public view returns (uint256) {
         return records.length;
     }
 }

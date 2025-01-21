@@ -16,7 +16,7 @@ contract SayethTest is Test {
     MockERC20 public _token;
     StakeReferrer public _stakeReferrer;
 
-    uint256 public _stakeAmt = 25e18;
+    uint256 public STAKE_AMT = 25e18;
     uint256 public ONE_WEEK = 604800;
 
     address public staker1 = address(45);
@@ -28,10 +28,10 @@ contract SayethTest is Test {
 
         _token = new MockERC20("Test", "TST");
 
-        _token.mint(staker1, _stakeAmt);
-        _token.mint(staker2, _stakeAmt);
+        _token.mint(staker1, STAKE_AMT);
+        _token.mint(staker2, STAKE_AMT);
 
-        _stakeReferrer = new StakeReferrer(address(_token), _stakeAmt, ONE_WEEK, address(this));
+        _stakeReferrer = new StakeReferrer(address(_token), STAKE_AMT, ONE_WEEK, address(this));
 
         _stake(staker1);
         _stake(staker2);
@@ -50,7 +50,7 @@ contract SayethTest is Test {
         assertEq(record.origin, address(1));
         assertEq(record.content, abi.encode("hello world computer"));
         assertEq(record.referrer, address(0));
-        assertEq(_sayeth.getRecordAmt(), 1);
+        assertEq(_sayeth.getRecordLength(), 1);
     }
 
     function testSay_isStaked() public {
@@ -66,7 +66,7 @@ contract SayethTest is Test {
         assertEq(record.origin, staker1);
         assertEq(record.content, abi.encode("hello world computer"));
         assertEq(record.referrer, address(_stakeReferrer));
-        assertEq(_sayeth.getRecordAmt(), 1);
+        assertEq(_sayeth.getRecordLength(), 1);
     }
 
     function testRevert_say_notStaked() public {
@@ -94,8 +94,8 @@ contract SayethTest is Test {
 
     function _stake(address _staker) public {
         vm.startPrank(_staker);
-        _token.approve(address(_stakeReferrer), _stakeAmt);
-        _stakeReferrer.stake(_stakeAmt);
+        _token.approve(address(_stakeReferrer), STAKE_AMT);
+        _stakeReferrer.stake(STAKE_AMT);
         vm.stopPrank();
     }
 
