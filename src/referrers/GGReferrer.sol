@@ -34,7 +34,7 @@ contract GGReferrer is IReferrer {
         }
     }
 
-    function validatePost(address _sender, address, bytes calldata _content) external view override returns (bool) {
+    function validatePost(address _sender, bytes calldata _content) external view override returns (bool) {
         (, uint256 _hatId) = abi.decode(_content, (Metadata, uint256));
 
         bool hatExists = validHatIds[_hatId];

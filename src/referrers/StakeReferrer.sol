@@ -66,7 +66,7 @@ contract StakeReferrer is ReentrancyGuard, Ownable, IReferrer {
         stakingPeriod = _newPeriod;
     }
 
-    function validatePost(address _sender, address, bytes calldata) public view returns (bool) {
+    function validatePost(address _sender, bytes calldata) public view returns (bool) {
         return stakes[_sender].isStaked;
     }
 }

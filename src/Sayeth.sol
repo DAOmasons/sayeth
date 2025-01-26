@@ -19,9 +19,7 @@ contract Sayeth {
 
     function sayeth(address _referrer, bytes calldata _content, bool _store) public {
         if (_referrer != address(0)) {
-            require(
-                IReferrer(_referrer).validatePost(msg.sender, tx.origin, _content), "Post not validated by referrer"
-            );
+            require(IReferrer(_referrer).validatePost(msg.sender, _content), "Post not validated by referrer");
         }
 
         if (_store) {
