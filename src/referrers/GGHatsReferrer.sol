@@ -4,13 +4,9 @@ pragma solidity ^0.8.13;
 import {IReferrer} from "../interfaces/IReferrer.sol";
 
 import {IHats} from "lib/hats-protocol/src/Interfaces/IHats.sol";
+import {Metadata} from "src/utils/Metadata.sol";
 
-struct Metadata {
-    uint256 protocol;
-    string pointer;
-}
-
-contract GGReferrer is IReferrer {
+contract GGHatsReferrer is IReferrer {
     event RegisterHat(uint256 hatId, bool valid);
 
     IHats hats;
@@ -34,7 +30,7 @@ contract GGReferrer is IReferrer {
         }
     }
 
-    function validatePost(address _sender, bytes calldata _content) external view override returns (bool) {
+    function validatePost(address _sender, bytes memory _content) external view override returns (bool) {
         (, uint256 _hatId) = abi.decode(_content, (Metadata, uint256));
 
         bool hatExists = validHatIds[_hatId];
