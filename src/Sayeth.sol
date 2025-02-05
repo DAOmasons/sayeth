@@ -10,14 +10,13 @@ struct Record {
     address referrer; // The address of the referrer contract (if any)
 }
 
-//
 contract Sayeth {
     event Say(address referrer, address sender, address origin, bytes content);
     event Scribe(address referrer, address sender, address origin, bytes content, uint256 index);
 
     Record[] public records;
 
-    function sayeth(address _referrer, bytes calldata _content, bool _store) public {
+    function sayeth(address _referrer, bytes memory _content, bool _store) public {
         if (_referrer != address(0)) {
             require(IReferrer(_referrer).validatePost(msg.sender, _content), "Post not validated by referrer");
         }
