@@ -21,6 +21,7 @@ contract SayethTest is Test, Accounts {
     MockERC20 public _token;
     StakeReferrer public _stakeReferrer;
     GGEmptyReferrer public _emptyReferrer;
+    GGHatsReferrer public _hatsReferrer;
 
     Metadata public _testMd = Metadata(1, "Qm...");
 
@@ -104,6 +105,56 @@ contract SayethTest is Test, Accounts {
         _sayeth.sayeth(address(_emptyReferrer), _data, false);
     }
 
+    function testInit_hats() public {
+        assertEq(_hatsReferrer.adminHatId(), adminHatId);
+        assertEq(_hatsReferrer.validHatIds(adminHatId), true);
+        assertEq(_hatsReferrer.validHatIds(judgeHatId), false);
+
+        assertTrue(_hatsReferrer.isValidWearer(admin1(), adminHatId));
+        assertTrue(_hatsReferrer.isValidWearer(admin2(), adminHatId));
+
+        assertTrue(_hatsReferrer.isValidWearer(judge1(), judgeHatId));
+        assertTrue(_hatsReferrer.isValidWearer(judge2(), judgeHatId));
+
+        assertFalse(_hatsReferrer.isValidWearer(admin1(), judgeHatId));
+        assertFalse(_hatsReferrer.isValidWearer(someGuy, adminHatId));
+    }
+
+    function testSay_hats() public {
+        bytes memory _data =
+            abi.encode("This is the tag", "This is an optional field for onchain JSON", _testMd, adminHatId);
+
+        vm.prank(admin1());
+        _sayeth.sayeth(address(_hatsReferrer), _data, false);
+    }
+
+    function testSay_hats_many() public {
+        bytes memory _data =
+            abi.encode("This is the tag", "This is an optional field for onchain JSON", _testMd, adminHatId);
+
+        vm.prank(admin1());
+        _sayeth.sayeth(address(_hatsReferrer), _data, false);
+
+        vm.prank(admin2());
+        _sayeth.sayeth(address(_hatsReferrer), _data, false);
+    }
+
+    function testSay_hats_addHat() public {
+        vm.prank(admin1());
+        _hatsReferrer.registerHat(judgeHatId, true);
+
+        assertEq(_hatsReferrer.validHatIds(judgeHatId), true);
+
+        bytes memory _data =
+            abi.encode("This is the tag", "This is an optional field for onchain JSON", _testMd, judgeHatId);
+
+        vm.prank(judge1());
+        _sayeth.sayeth(address(_hatsReferrer), _data, false);
+
+        vm.prank(judge2());
+        _sayeth.sayeth(address(_hatsReferrer), _data, false);
+    }
+
     function testRevert_say_emptyReferrer_incorrectModel() public {
         bytes memory _data = abi.encode("");
 
@@ -142,6 +193,32 @@ contract SayethTest is Test, Accounts {
         vm.expectRevert("Post not validated by referrer");
 
         _sayeth.sayeth(address(_stakeReferrer), abi.encode("hello world computer"), true);
+    }
+
+    function testRevert_hatsReferrer_invalidHat() public {
+        bytes memory _data =
+            abi.encode("This is the tag", "This is an optional field for onchain JSON", _testMd, judgeHatId);
+
+        vm.expectRevert("Post not validated by referrer");
+
+        vm.prank(judge1());
+        _sayeth.sayeth(address(_hatsReferrer), _data, false);
+    }
+
+    function testRevert_hatsReferrer_invalidWearer() public {
+        bytes memory _data =
+            abi.encode("This is the tag", "This is an optional field for onchain JSON", _testMd, adminHatId);
+
+        vm.expectRevert("Post not validated by referrer");
+
+        vm.prank(someGuy, someGuy);
+        _sayeth.sayeth(address(_hatsReferrer), _data, false);
+    }
+
+    function testRevert_hatsReferrer_notAdmin() public {
+        vm.prank(someGuy);
+        vm.expectRevert("GGReferrer: not admin");
+        _hatsReferrer.registerHat(judgeHatId, true);
     }
 
     function testRevert_say_withdrawn() public {
@@ -213,15 +290,10 @@ contract SayethTest is Test, Accounts {
         vm.prank(admin1());
         hats.batchMintHats(judgeIds, judges);
 
-        uint256[] memory validHatIds = new uint256[](2);
+        uint256[] memory validHatIds = new uint256[](1);
 
         validHatIds[0] = adminHatId;
-        validHatIds[1] = judgeHatId;
 
-        GGHatsReferrer hatsReferrer = new GGHatsReferrer(validHatIds, address(hats), adminHatId);
-
-        vm.prank(admin1());
-
-        hatsReferrer.createHat(adminHatId, "otherHat", 100, address(13), address(13), true, "");
+        _hatsReferrer = new GGHatsReferrer(validHatIds, address(hats), adminHatId);
     }
 }
