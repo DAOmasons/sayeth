@@ -1,0 +1,4 @@
+solady/=lib/hats-protocol/lib/solady/src/
+hats-protocol/solady/=lib/hats-protocol/lib/solady/src/
+hats-protocol/=lib/hats-protocol/src/
+solbase/=lib/hats-protocol/lib/solbase/src/

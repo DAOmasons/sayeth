@@ -2,14 +2,17 @@
 pragma solidity ^0.8.13;
 
 import {Sayeth, Record} from "../src/Sayeth.sol";
+import {Hats} from "lib/hats-protocol/src/Hats.sol";
 
 import {Test, console} from "forge-std/Test.sol";
 import {MockERC20} from "./utils/MockERC20.sol";
 import {StakeReferrer} from "../src/referrers/StakeReferrer.sol";
 import {GGEmptyReferrer} from "../src/referrers/GGEmptyReferrer.sol";
+import {GGHatsReferrer} from "../src/referrers/GGHatsReferrer.sol";
 import {Metadata} from "../src/utils/Metadata.sol";
+import {Accounts} from "./Accounts.t.sol";
 
-contract SayethTest is Test {
+contract SayethTest is Test, Accounts {
     event Say(address referrer, address sender, address origin, bytes content);
     event Scribe(address referrer, address sender, address origin, bytes content, uint256 index);
 
@@ -28,6 +31,13 @@ contract SayethTest is Test {
     address public staker2 = address(46);
     address public someGuy = address(47);
 
+    Hats hats;
+    uint256 topHatId;
+    uint256 adminHatId;
+    uint256 judgeHatId;
+    address[] admins;
+    address[] judges;
+
     function setUp() public {
         _sayeth = new Sayeth();
 
@@ -38,6 +48,7 @@ contract SayethTest is Test {
 
         _stakeReferrer = new StakeReferrer(address(_token), STAKE_AMT, ONE_WEEK, address(this));
         _emptyReferrer = new GGEmptyReferrer();
+        _setupHats();
 
         _stake(staker1);
         _stake(staker2);
@@ -167,5 +178,50 @@ contract SayethTest is Test {
 
         vm.prank(_poster, _poster);
         _sayeth.sayeth(_referrer, abi.encode("hello world computer"), true);
+    }
+
+    function _setupHats() private {
+        hats = new Hats("", "");
+
+        topHatId = hats.mintTopHat(dummyDao(), "", "");
+
+        vm.prank(dummyDao());
+        adminHatId = hats.createHat(topHatId, "admin", 100, address(13), address(13), true, "");
+
+        admins.push(admin1());
+        admins.push(admin2());
+
+        uint256[] memory adminIds = new uint256[](admins.length);
+
+        adminIds[0] = adminHatId;
+        adminIds[1] = adminHatId;
+
+        vm.prank(dummyDao());
+        hats.batchMintHats(adminIds, admins);
+
+        vm.prank(admin1());
+        judgeHatId = hats.createHat(adminHatId, "judge", 100, address(13), address(13), true, "");
+
+        judges.push(judge1());
+        judges.push(judge2());
+
+        uint256[] memory judgeIds = new uint256[](judges.length);
+
+        judgeIds[0] = judgeHatId;
+        judgeIds[1] = judgeHatId;
+
+        vm.prank(admin1());
+        hats.batchMintHats(judgeIds, judges);
+
+        uint256[] memory validHatIds = new uint256[](2);
+
+        validHatIds[0] = adminHatId;
+        validHatIds[1] = judgeHatId;
+
+        GGHatsReferrer hatsReferrer = new GGHatsReferrer(validHatIds, address(hats), adminHatId);
+
+        vm.prank(admin1());
+
+        hatsReferrer.createHat(adminHatId, "otherHat", 100, address(13), address(13), true, "");
     }
 }

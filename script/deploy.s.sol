@@ -4,6 +4,7 @@ pragma solidity ^0.8.13;
 import {Script, console2} from "forge-std/Script.sol";
 import {stdJson} from "forge-std/StdJson.sol";
 import {Sayeth} from "src/Sayeth.sol";
+import {GGEmptyReferrer} from "src/referrers/GGEmptyReferrer.sol";
 
 contract Deploy is Script {
     string _network;
@@ -23,6 +24,7 @@ contract Deploy is Script {
         vm.startBroadcast(deployer);
 
         _deploySayeth();
+        _deployEmptyReferrer();
 
         vm.stopBroadcast();
     }
@@ -44,4 +46,12 @@ contract Deploy is Script {
 
         console2.log("Deployed Sayeth at address: ", address(_sayeth));
     }
+
+    function _deployEmptyReferrer() internal {
+        GGEmptyReferrer _emptyReferrer = new GGEmptyReferrer();
+
+        console2.log("Deployed Sayeth at address: ", address(_emptyReferrer));
+    }
 }
+
+// 0x0000000000000000000000000000000000004A75

@@ -31,7 +31,7 @@ contract GGHatsReferrer is IReferrer {
     }
 
     function validatePost(address _sender, bytes memory _content) external view override returns (bool) {
-        (, uint256 _hatId) = abi.decode(_content, (Metadata, uint256));
+        (,,, uint256 _hatId) = abi.decode(_content, (string, string, Metadata, uint256));
 
         bool hatExists = validHatIds[_hatId];
 
